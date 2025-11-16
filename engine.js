@@ -10,7 +10,7 @@ let currentIndex = {};
 let extensionsMap = {};
 let originalIndex = {};
 
-// Dados embutidos no JavaScript - 100% serverless
+// Mapa de extensões das imagens PNG (resto é JPG)
 const EXTENSIONS_MAP = {
     "image4": "png", "image7": "png", "image8": "png", "image9": "png", 
     "image44": "png", "image57": "png", "image79": "png", "image81": "png", 
@@ -19,36 +19,76 @@ const EXTENSIONS_MAP = {
     "image197": "png"
 };
 
-const DEFAULT_INDEX = {
-  "2": ["image115", "image114"],
-  "3": ["image205", "image204", "image203"],
-  "7": ["image195", "image191", "image190", "image193", "image192", "image156", "image164"],
-  "15": ["image31", "image34", "image18", "image174", "image170", "image146", "image149", "image152", "image155", "image202", "image182", "image181", "image184", "image183", "image180"],
-  "17": ["image104", "image102", "image110", "image107", "image96", "image24", "image65", "image128", "image118", "image121", "image126", "image145", "image154", "image151", "image142", "image139", "image179"],
-  "18": ["image205", "image204", "image203", "image31", "image34", "image18", "image174", "image170", "image146", "image149", "image152", "image155", "image202", "image182", "image181", "image184", "image183", "image180", "image165", "image162", "image148", "image32", "image33", "image35", "image22", "image55", "image58", "image61", "image62", "image133", "image93", "image132", "image14", "image16", "image20", "image49", "image52", "image60", "image67", "image64", "image51", "image48", "image167", "image113", "image103", "image101", "image108", "image105", "image94", "image91", "image99", "image97", "image88", "image136", "image134", "image124", "image122", "image129", "image127", "image117", "image116", "image120", "image119", "image59", "image66", "image63", "image50", "image47", "image56", "image53", "image42", "image41", "image45", "image82", "image80", "image86", "image84"],
-  "19": ["image115", "image114", "image104", "image102", "image110", "image107", "image96", "image200", "image201", "image98", "image199", "image198", "image36", "image37", "image38", "image39", "image26", "image28", "image29"],
-  "20": ["image197", "image36", "image37", "image38", "image39", "image26", "image28", "image29", "image70", "image71", "image73", "image75", "image77", "image112", "image89", "image90", "image109", "image106", "image95", "image92"],
-  "24": ["image157", "image165", "image162", "image148", "image40", "image12", "image79", "image81", "image85", "image87", "image46", "image131", "image177", "image176", "image158", "image160", "image163", "image140", "image111"],
-  "25": ["image32", "image33", "image35", "image22", "image55", "image58", "image61", "image62", "image133", "image93", "image132", "image100", "image137", "image135", "image125", "image123", "image130", "image57", "image54", "image8", "image7", "image10", "image9", "image4", "image3"],
-  "27": ["image195", "image191", "image190", "image193", "image192", "image156", "image164", "image6", "image5", "image2", "image1", "image186", "image185", "image189", "image197", "image83", "image43", "image44", "image168", "image169", "image188", "image187", "image157", "image40", "image12", "image79", "image81"],
-  "29": ["image14", "image16", "image20", "image49", "image52", "image60", "image67", "image64", "image51", "image48", "image167", "image113", "image103", "image101", "image108", "image105", "image94", "image91", "image99", "image97", "image88", "image136", "image134", "image124", "image122", "image129", "image127", "image117", "image116"],
-  "35": ["image167", "image113", "image103", "image101", "image108", "image105", "image94", "image91", "image99", "image97", "image88", "image136", "image134", "image124", "image122", "image129", "image127", "image117", "image116", "image120", "image119", "image59", "image66", "image63", "image50", "image47", "image56", "image53", "image42", "image41", "image45", "image82", "image80", "image86", "image84"],
-  "39": ["image161", "image147", "image144", "image153", "image150", "image141", "image138", "image143", "image173", "image178", "image172", "image175", "image171", "image166", "image159", "image74", "image72", "image78", "image76", "image69", "image68", "image30", "image23", "image21", "image27", "image25", "image15", "image19", "image17", "image13", "image11", "image194", "image196"],
-  "47": ["image74", "image72", "image78", "image76", "image69", "image68", "image30", "image23", "image21", "image27", "image25", "image15", "image19", "image17", "image13", "image11", "image194", "image196", "image6", "image5", "image2", "image1", "image186", "image185", "image189", "image197", "image83", "image43", "image44", "image168", "image169", "image188", "image187", "image157", "image40", "image12", "image79", "image81", "image85", "image87", "image46", "image131", "image177", "image176", "image158", "image160"],
-  "60": ["image167", "image113", "image103", "image101", "image108", "image105", "image94", "image91", "image99", "image97", "image88", "image136", "image134", "image124", "image122", "image129", "image127", "image117", "image116", "image120", "image119", "image59", "image66", "image63", "image50", "image47", "image56", "image53", "image42", "image41", "image45", "image82", "image80", "image86", "image84", "image161", "image147", "image144", "image153", "image150", "image141", "image138", "image143", "image173", "image178", "image172", "image175", "image171", "image166", "image159", "image74", "image72", "image78", "image76", "image69", "image68", "image30", "image23", "image21"]
-};
-
-// Carrega os dados embutidos - 100% serverless
+// Carrega os mapeamentos de extensões das imagens
 function loadExtensionsMap() {
     extensionsMap = EXTENSIONS_MAP;
     return Promise.resolve();
 }
 
-// Carrega o index embutido - 100% serverless  
-function loadIndex() {
-    currentIndex = JSON.parse(JSON.stringify(DEFAULT_INDEX)); // Deep copy
-    originalIndex = JSON.parse(JSON.stringify(DEFAULT_INDEX)); // Deep copy
-    return Promise.resolve(currentIndex);
+// Carrega JSON com sistema de versionamento - SEM DADOS HARDCODED
+async function loadIndex() {
+    console.log('🔄 Sistema de carregamento de JSON iniciado...');
+    
+    const jsonFiles = [
+        'index_updated.json',  // Versão mais recente (se existir)
+        'index.json'           // Versão original (fallback)
+    ];
+    
+    for (const fileName of jsonFiles) {
+        console.log(`📂 Tentando carregar: ${fileName}`);
+        
+        // Método 1: XMLHttpRequest (mais compatível com file://)
+        try {
+            const data = await loadJSONFile(fileName);
+            if (data && Object.keys(data).length > 0) {
+                currentIndex = data;
+                originalIndex = await loadOriginalJSON(); // Sempre manter referência ao original
+                console.log(`✅ ${fileName} carregado com sucesso!`);
+                console.log(`📊 Carregados ${Object.keys(currentIndex).length} blocos`);
+                return currentIndex;
+            }
+        } catch (error) {
+            console.log(`⚠️ Falha ao carregar ${fileName}: ${error.message}`);
+            continue; // Tenta o próximo arquivo
+        }
+    }
+    
+    throw new Error('❌ Nenhum arquivo JSON foi encontrado. Verifique se index.json existe na pasta.');
+}
+
+// Carrega arquivo JSON usando XMLHttpRequest (compatível com file://)
+function loadJSONFile(fileName) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', fileName, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200 || xhr.status === 0) { // 0 = file://
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        resolve(data);
+                    } catch (error) {
+                        reject(new Error(`JSON inválido: ${error.message}`));
+                    }
+                } else {
+                    reject(new Error(`Erro HTTP: ${xhr.status}`));
+                }
+            }
+        };
+        xhr.onerror = () => reject(new Error('Erro de rede'));
+        xhr.send();
+    });
+}
+
+// Carrega sempre o JSON original como referência
+async function loadOriginalJSON() {
+    try {
+        const data = await loadJSONFile('index.json');
+        return data;
+    } catch (error) {
+        console.warn('⚠️ Não foi possível carregar index.json original');
+        return currentIndex; // Usa os dados atuais como fallback
+    }
 }
 
 // Detecta dinamicamente a extensão da imagem (PNG ou JPG)
@@ -187,25 +227,45 @@ function handleDragEnd(e) {
     draggedFromIndex = null;
 }
 
-// Salva o estado atual - 100% serverless com download automático
+// Sistema de salvamento com versionamento - SEM localStorage
 function saveIndex() {
     try {
-        // Salva no localStorage para persistência local
-        localStorage.setItem('planetzoo_index', JSON.stringify(currentIndex));
-        
-        // Cria arquivo JSON para download
+        const timestamp = Date.now();
         const dataStr = JSON.stringify(currentIndex, null, 2);
         const dataBlob = new Blob([dataStr], {type: 'application/json'});
         
+        // Criar arquivo de atualização (sobrescreve o anterior)
         const link = document.createElement('a');
         link.href = URL.createObjectURL(dataBlob);
-        link.download = 'index.json';
+        link.download = 'index_updated.json'; // Nome específico para versão atualizada
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
         
-        showStatus('Ordem salva com sucesso! Arquivo baixado.', 'success');
+        console.log('💾 Arquivo index_updated.json criado');
+        showStatus('Configuração salva! Veja as instruções.', 'success');
+        
+        // Instruções claras para o usuário
+        setTimeout(() => {
+            alert(`✅ ARQUIVO SALVO: index_updated.json
+
+📝 INSTRUÇÕES:
+1. O arquivo "index_updated.json" foi baixado
+2. Mova este arquivo para a MESMA PASTA onde está o index.html
+3. Recarregue a página (F5)
+
+🔄 COMO FUNCIONA:
+• O sistema sempre carrega "index_updated.json" se existir
+• Se não existir, carrega o "index.json" original
+• Suas alterações ficam em "index_updated.json"
+• O "index.json" original nunca é modificado
+
+⚠️ IMPORTANTE: Mova o arquivo baixado para a pasta do projeto!`);
+        }, 500);
+        
     } catch (error) {
         console.error('Erro ao salvar:', error);
-        showStatus('Erro ao salvar a ordem.', 'error');
+        showStatus('Erro ao criar arquivo de configuração.', 'error');
     }
 }
 
@@ -234,33 +294,52 @@ function showStatus(message, type) {
 window.saveOrder = saveIndex;
 window.resetOrder = resetToOriginal;
 
-// Inicialização da aplicação - 100% serverless
-function init() {
+// Inicialização da aplicação - Carrega apenas do JSON
+async function init() {
     console.log('🚀 Iniciando Planet Zoo Wishlist Engine...');
     
-    // Verificar se há dados salvos no localStorage
-    const savedData = localStorage.getItem('planetzoo_index');
-    if (savedData) {
-        try {
-            currentIndex = JSON.parse(savedData);
-            originalIndex = JSON.parse(JSON.stringify(DEFAULT_INDEX)); // Keep original as default
-            console.log('📂 Dados carregados do localStorage');
-        } catch (error) {
-            console.warn('❌ Erro ao carregar localStorage, usando dados padrão');
-            loadIndex();
+    try {
+        // Carregar dados do sistema de versionamento JSON
+        await loadIndex();
+        
+        // Verificar se carregou dados
+        if (Object.keys(currentIndex).length === 0) {
+            throw new Error('Nenhum bloco foi carregado do JSON');
         }
-    } else {
-        loadIndex();
+        
+        // Carregar mapeamento de extensões
+        loadExtensionsMap();
+        
+        // Renderizar interface
+        renderBlocks();
+        
+        // Estatísticas
+        const totalImages = Object.values(currentIndex).reduce((sum, block) => sum + block.length, 0);
+        console.log('✅ Engine carregada com sucesso!');
+        console.log(`🖼️ Total de ${totalImages} imagens em ${Object.keys(currentIndex).length} blocos`);
+        
+    } catch (error) {
+        console.error('❌ Erro na inicialização:', error);
+        showStatus(`${error.message}`, 'error');
+        
+        // Mostrar instruções se o arquivo não foi encontrado
+        if (error.message.includes('JSON foi encontrado')) {
+            setTimeout(() => {
+                alert(`❌ ERRO: Arquivo index.json não encontrado!
+
+📝 SOLUÇÃO:
+1. Certifique-se que o arquivo "index.json" está na mesma pasta do index.html
+2. Verifique se o arquivo não está corrompido
+3. Se você moveu os arquivos, certifique-se que todos estão juntos
+
+📁 ESTRUTURA NECESSÁRIA:
+• index.html
+• index.json  ← ESTE ARQUIVO É OBRIGATÓRIO
+• engine.js
+• images/ (pasta com as imagens)`);
+            }, 1000);
+        }
     }
-    
-    loadExtensionsMap();
-    renderBlocks();
-    
-    console.log('✅ Engine carregada com sucesso!');
-    console.log(`📊 Carregados ${Object.keys(currentIndex).length} blocos`);
-    
-    const totalImages = Object.values(currentIndex).reduce((sum, block) => sum + block.length, 0);
-    console.log(`🖼️ Total de ${totalImages} imagens`);
 }
 
 // Inicializar quando o DOM estiver pronto
