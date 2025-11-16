@@ -119,18 +119,42 @@ async function loadIndex() {
         });
     }
     
-    // Função demo
+    // Função demo - carrega estrutura completa original
     window.loadDemoData = async function() {
-        currentIndex = {
-            "2": ["image115", "image114"], 
-            "3": ["image205", "image204", "image203"]
-        };
-        originalIndex = JSON.parse(JSON.stringify(currentIndex));
-        fileHandle = null;
-        
-        console.log('🎯 Dados demo carregados');
-        await renderBlocks();
-        showStatus('Dados de demonstração ativados!', 'success');
+        try {
+            // Carregar estrutura completa do arquivo
+            const response = await fetch('complete_structure.json');
+            const completeStructure = await response.json();
+            
+            currentIndex = completeStructure;
+            originalIndex = JSON.parse(JSON.stringify(completeStructure));
+            fileHandle = null;
+            
+            console.log('🎯 Estrutura completa carregada');
+            await renderCompleteStructure();
+            showStatus('Estrutura original Planet Zoo carregada!', 'success');
+        } catch (error) {
+            console.error('Erro ao carregar estrutura completa:', error);
+            // Fallback para dados mínimos
+            currentIndex = {
+                "sections": [
+                    {
+                        "title": "ANIMAIS",
+                        "subtitle": "pontos", 
+                        "type": "images",
+                        "blocks": [
+                            {"id": "2", "title": "2", "images": ["image115", "image114"]},
+                            {"id": "3", "title": "3", "images": ["image205", "image204", "image203"]}
+                        ]
+                    }
+                ]
+            };
+            originalIndex = JSON.parse(JSON.stringify(currentIndex));
+            
+            console.log('🎯 Dados demo básicos carregados');
+            await renderCompleteStructure();
+            showStatus('Dados de demonstração ativados!', 'success');
+        }
     };
 }
 
@@ -188,7 +212,113 @@ function createAddButton(blockNumber) {
     return addButton;
 }
 
-// Renderiza todos os blocos na tela
+// Renderiza a estrutura completa seguindo o arquivo original
+async function renderCompleteStructure() {
+    const container = document.getElementById('blocksContainer');
+    container.innerHTML = '';
+    
+    if (!currentIndex.sections) {
+        // Fallback para estrutura antiga
+        await renderBlocks();
+        return;
+    }
+    
+    for (const section of currentIndex.sections) {
+        // Criar seção principal
+        const sectionElement = document.createElement('div');
+        sectionElement.className = 'main-section';
+        
+        // Título da seção
+        const sectionTitle = document.createElement('h1');
+        sectionTitle.className = 'section-title';
+        sectionTitle.textContent = section.title;
+        sectionElement.appendChild(sectionTitle);
+        
+        // Subtítulo se existir
+        if (section.subtitle) {
+            const sectionSubtitle = document.createElement('h2');
+            sectionSubtitle.className = 'section-subtitle';
+            sectionSubtitle.textContent = section.subtitle;
+            sectionElement.appendChild(sectionSubtitle);
+        }
+        
+        if (section.type === 'images' && section.blocks) {
+            // Seção com imagens
+            for (const block of section.blocks) {
+                const blockElement = document.createElement('div');
+                blockElement.className = 'block';
+                blockElement.dataset.blockNumber = block.id;
+                blockElement.dataset.sectionTitle = section.title;
+                
+                // Header do bloco
+                const header = document.createElement('div');
+                header.className = 'block-header';
+                header.innerHTML = `
+                    <div class="block-title">${block.title}</div>
+                    <div class="block-count">${block.images ? block.images.length : 0} imagens</div>
+                `;
+                
+                // Grid container para as imagens
+                const gridContainer = document.createElement('div');
+                gridContainer.className = 'grid-container';
+                
+                // Adicionar as imagens
+                if (block.images) {
+                    for (let index = 0; index < block.images.length; index++) {
+                        const imageName = block.images[index];
+                        const imageElement = await createImageElement(imageName, block.id, index);
+                        gridContainer.appendChild(imageElement);
+                    }
+                    
+                    // Adicionar botão "+" ao final
+                    const addButton = createAddButton(block.id);
+                    gridContainer.appendChild(addButton);
+                }
+                
+                blockElement.appendChild(header);
+                blockElement.appendChild(gridContainer);
+                sectionElement.appendChild(blockElement);
+            }
+        } else if (section.type === 'text') {
+            // Seção apenas texto
+            const textContainer = document.createElement('div');
+            textContainer.className = 'text-section';
+            
+            if (section.items) {
+                const itemsList = document.createElement('ul');
+                itemsList.className = 'text-items';
+                section.items.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = item;
+                    itemsList.appendChild(listItem);
+                });
+                textContainer.appendChild(itemsList);
+            }
+            
+            if (section.not_included) {
+                const notIncludedTitle = document.createElement('h3');
+                notIncludedTitle.textContent = 'Não adicionam nada:';
+                notIncludedTitle.className = 'not-included-title';
+                textContainer.appendChild(notIncludedTitle);
+                
+                const notIncludedList = document.createElement('ul');
+                notIncludedList.className = 'not-included-items';
+                section.not_included.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = item;
+                    notIncludedList.appendChild(listItem);
+                });
+                textContainer.appendChild(notIncludedList);
+            }
+            
+            sectionElement.appendChild(textContainer);
+        }
+        
+        container.appendChild(sectionElement);
+    }
+}
+
+// Fallback para estrutura antiga
 async function renderBlocks() {
     const container = document.getElementById('blocksContainer');
     container.innerHTML = '';
