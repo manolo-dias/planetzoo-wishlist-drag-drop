@@ -30,39 +30,36 @@ planetzoo_wishlist/
 
 ## 🛠️ Como Usar
 
-1. **Iniciar Servidor Local**:
-   ```bash
-   cd planetzoo_wishlist
-   python3 -m http.server 8000
-   ```
+1. **Abertura Direta (100% Serverless)**:
+   - Baixe todos os arquivos do repositório
+   - Abra o arquivo `index.html` diretamente no navegador
+   - **Não precisa de servidor!** Funciona com `file://` protocol
 
-2. **Acessar a Interface**:
-   - Abra o navegador e acesse `http://localhost:8000`
-   - A interface carregará automaticamente todos os blocos e imagens
-
-3. **Reordenar Imagens**:
+2. **Reordenar Imagens**:
    - Clique e arraste qualquer imagem para uma nova posição
    - As alterações são aplicadas instantaneamente
    - Funciona entre diferentes blocos também
 
-4. **Salvar Alterações**:
+3. **Salvar Alterações**:
    - Clique no botão "💾 Salvar Ordem"
    - O arquivo `index.json` será baixado automaticamente
    - Substitua o arquivo original para manter as alterações
 
-5. **Restaurar Original**:
+4. **Restaurar Original**:
    - Clique no botão "🔄 Restaurar Original"
    - Confirme a ação no modal
    - A ordem original será restaurada imediatamente
 
 ## 🎨 Características Técnicas
 
+- **100% Serverless**: Funciona offline, sem necessidade de servidor
 - **Framework**: Vanilla JavaScript (sem dependências)
 - **Drag & Drop**: HTML5 Drag and Drop API nativa
 - **Responsivo**: CSS Grid e Flexbox
-- **Persistência**: JSON + LocalStorage + Download automático
-- **Detecção de Extensão**: Sistema inteligente PNG/JPG fallback
+- **Persistência**: LocalStorage + Download automático de JSON
+- **Detecção de Extensão**: Sistema inteligente PNG/JPG embutido
 - **Organização**: 16 blocos com 205 imagens únicas totais
+- **Compatibilidade**: Funciona em qualquer navegador moderno
 
 ## 📊 Estatísticas do Projeto
 
