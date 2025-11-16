@@ -10,85 +10,82 @@ let currentIndex = {};
 let extensionsMap = {};
 let originalIndex = {};
 
-// Mapa de extensões das imagens PNG (resto é JPG)
-const EXTENSIONS_MAP = {
-    "image4": "png", "image7": "png", "image8": "png", "image9": "png", 
-    "image44": "png", "image57": "png", "image79": "png", "image81": "png", 
-    "image83": "png", "image85": "png", "image96": "png", "image102": "png", 
-    "image104": "png", "image107": "png", "image110": "png", "image157": "png", 
-    "image197": "png"
-};
-
-// Carrega os mapeamentos de extensões das imagens
-function loadExtensionsMap() {
-    extensionsMap = EXTENSIONS_MAP;
-    return Promise.resolve();
+// Carrega mapeamento de extensões - detecção dinâmica como fallback
+async function loadExtensionsMap() {
+    // Para serverless, usar detecção dinâmica por padrão
+    extensionsMap = {}; // Vazio = tenta ambas as extensões automaticamente
+    console.log('✅ Sistema de detecção dinâmica de extensões ativado');
 }
 
-// Carrega JSON com sistema de versionamento - SEM DADOS HARDCODED
+// Sistema de carregamento que FUNCIONA com file:// - File Input
 async function loadIndex() {
-    console.log('🔄 Sistema de carregamento de JSON iniciado...');
+    console.log('🔄 Sistema de carregamento serverless iniciado...');
     
-    const jsonFiles = [
-        'index_updated.json',  // Versão mais recente (se existir)
-        'index.json'           // Versão original (fallback)
-    ];
-    
-    for (const fileName of jsonFiles) {
-        console.log(`📂 Tentando carregar: ${fileName}`);
-        
-        // Método 1: XMLHttpRequest (mais compatível com file://)
-        try {
-            const data = await loadJSONFile(fileName);
-            if (data && Object.keys(data).length > 0) {
-                currentIndex = data;
-                originalIndex = await loadOriginalJSON(); // Sempre manter referência ao original
-                console.log(`✅ ${fileName} carregado com sucesso!`);
-                console.log(`📊 Carregados ${Object.keys(currentIndex).length} blocos`);
-                return currentIndex;
-            }
-        } catch (error) {
-            console.log(`⚠️ Falha ao carregar ${fileName}: ${error.message}`);
-            continue; // Tenta o próximo arquivo
-        }
-    }
-    
-    throw new Error('❌ Nenhum arquivo JSON foi encontrado. Verifique se index.json existe na pasta.');
-}
-
-// Carrega arquivo JSON usando XMLHttpRequest (compatível com file://)
-function loadJSONFile(fileName) {
+    // Criar interface de carregamento de arquivo
     return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', fileName, true);
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200 || xhr.status === 0) { // 0 = file://
+        const container = document.getElementById('blocksContainer');
+        container.innerHTML = `
+            <div style="text-align: center; padding: 50px; border: 2px dashed #ddd; border-radius: 10px; margin: 20px;">
+                <h3>📁 Carregar Configuração JSON</h3>
+                <p>Para funcionar em modo serverless, selecione o arquivo JSON:</p>
+                
+                <input type="file" id="jsonFileInput" accept=".json" style="margin: 20px;">
+                <br><br>
+                
+                <div style="background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <strong>📝 ARQUIVOS ACEITOS:</strong><br>
+                    • <code>index.json</code> (configuração original)<br>
+                    • <code>index_updated.json</code> (configuração modificada)<br>
+                    • Qualquer arquivo JSON com a estrutura correta
+                </div>
+                
+                <button onclick="loadDemoData()" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 10px;">
+                    🎯 Usar Dados de Demonstração
+                </button>
+            </div>
+        `;
+        
+        // Event listener para o input de arquivo
+        document.getElementById('jsonFileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file && file.type === 'application/json') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
                     try {
-                        const data = JSON.parse(xhr.responseText);
-                        resolve(data);
+                        const data = JSON.parse(e.target.result);
+                        if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+                            currentIndex = data;
+                            originalIndex = JSON.parse(JSON.stringify(data)); // Deep copy
+                            console.log(`✅ ${file.name} carregado com sucesso!`);
+                            console.log(`📊 Carregados ${Object.keys(currentIndex).length} blocos`);
+                            resolve(currentIndex);
+                        } else {
+                            throw new Error('Arquivo JSON está vazio ou inválido');
+                        }
                     } catch (error) {
-                        reject(new Error(`JSON inválido: ${error.message}`));
+                        showStatus(`Erro ao ler ${file.name}: ${error.message}`, 'error');
+                        reject(error);
                     }
-                } else {
-                    reject(new Error(`Erro HTTP: ${xhr.status}`));
-                }
+                };
+                reader.readAsText(file);
+            } else {
+                showStatus('Por favor, selecione um arquivo JSON válido.', 'error');
             }
+        });
+        
+        // Função global para dados demo (se o usuário não tiver o arquivo)
+        window.loadDemoData = function() {
+            // Dados mínimos para demonstração (só para teste)
+            currentIndex = {
+                "2": ["image115", "image114"],
+                "3": ["image205", "image204", "image203"]
+            };
+            originalIndex = JSON.parse(JSON.stringify(currentIndex));
+            console.log('🎯 Dados de demonstração carregados (2 blocos apenas)');
+            showStatus('Dados de demonstração carregados! Para usar seus dados, carregue o arquivo JSON.', 'success');
+            resolve(currentIndex);
         };
-        xhr.onerror = () => reject(new Error('Erro de rede'));
-        xhr.send();
     });
-}
-
-// Carrega sempre o JSON original como referência
-async function loadOriginalJSON() {
-    try {
-        const data = await loadJSONFile('index.json');
-        return data;
-    } catch (error) {
-        console.warn('⚠️ Não foi possível carregar index.json original');
-        return currentIndex; // Usa os dados atuais como fallback
-    }
 }
 
 // Detecta dinamicamente a extensão da imagem (PNG ou JPG)
