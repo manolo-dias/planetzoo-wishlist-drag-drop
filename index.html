@@ -115,6 +115,63 @@
             border-radius: 3px;
         }
 
+        .remove-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .image-item:hover .remove-btn {
+            display: flex;
+        }
+
+        .remove-btn:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        .add-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 60px;
+            height: 60px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-button:hover {
+            border-color: #007bff;
+            background: #e3f2fd;
+        }
+
+        .add-icon {
+            font-size: 24px;
+            color: #6c757d;
+            font-weight: bold;
+        }
+
+        .add-button:hover .add-icon {
+            color: #007bff;
+            transform: scale(1.1);
+        }
+
         .controls {
             text-align: center;
             margin-bottom: 20px;
